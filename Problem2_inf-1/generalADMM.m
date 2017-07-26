@@ -13,7 +13,7 @@ function [u_iter,stats] = generalADMM(matrices, func_costo, solvers,  params, op
 %               opts.tol: vector de toleracion de la forma [eps_absoluto eps_relativo]
 %                opts.x0: solución inicial
 %                opts.z0: solución inicial
-%                
+%                opt.verbose
 % PARÁMETROS DE SALIDA
 % =====================
 %    u_iter: x,z de cada iteracion
@@ -72,28 +72,30 @@ for k=1:opts.maxiter
     % ==================================
     costo(k) = func_costo(x,z);
     costo_aumentada(k) =func_costo_aumentada(x,z,v,rho);
+        if (opts.verbose)
+
     disp(['Total: ' num2str( costo(k))])
-    
+        end    
     t0 = tic; % inicio de contador de tiempo
     
     % =================
     % x update
     % =================
 %     x_anterior=x;
-    x = solveX(x,z,A,B,c,v,rho,params);
+    x = solveX(x,z,A,B,c,v,rho,params, AT);
 %         norm(x-x_anterior)
 
+    if (opts.verbose)
     disp(['x actualizado: ' num2str(func_costo_aumentada(x,z,v,rho))])
-    
+    end
     % =================
     % z update
     % =================
     z_anterior = z;
-    z = solveZ(x,z,A,B,c,v,rho,params);
-            norm(z-z_anterior)
-
+    z = solveZ(x,z,A,B,c,v,rho,params, AT);
+    if (opts.verbose)
     disp(['z actualizado: ' num2str(func_costo_aumentada(x,z,v,rho))])
-    
+    end
     % ============================================
     % update of scales dual variables
     % ============================================
@@ -101,9 +103,10 @@ for k=1:opts.maxiter
 
     v = v + A(x) + B(z) - c;
 %                 norm(v-v_anterior)
+        if (opts.verbose)
 
     disp(['v actualizado: ' num2str(func_costo_aumentada(x,z,v,rho))])
-
+        end
     % ============================================
     % Condiciones de parada
     % ============================================    

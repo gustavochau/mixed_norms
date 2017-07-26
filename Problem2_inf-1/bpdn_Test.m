@@ -50,17 +50,17 @@ opts.rho0 = 1; % rho inicial
 opts.tol = [1E-4 1E-4]; % [tolerancia absoluta  tolerancia_relativa]
 opts.parrho = [5 1.5 1.5];
 opts.u0 =randn(dctLevels*dctLevels*Nrows*Ncols,1); %solución inicial
-opts.rhoopt = 'fix'; % opción de rho
-% [u_admmF, statsF] = myADMM(Phi, In(:), lambda, opts); 
-% IrecF = reshape(K(u_admmF(:,end)), Nrows, Ncols );
-% figure, imshowpair(In,IrecF,'montage')
+opts.rhoopt = 'var'; % opción de rho
+[u_admmF, statsF] = myADMM(Phi, In(:), lambda, opts); 
+IrecF = reshape(K(u_admmF(:,end)), Nrows, Ncols );
+figure, imshowpair(In,IrecF,'montage')
 
 % 
 % %%%%%%%% general ADMM
 num_ele = dctLevels*dctLevels*Nrows*Ncols;
 opts.x0 =opts.u0;
 opts.z0 =opts.u0;
-
+opts.verbose = 0;
 params.K=K;
 params.KT=KT;
 params.In = In(:);
@@ -81,7 +81,7 @@ disp('===============')
 Irec_gen = reshape(K(u_iter(end).x), Nrows, Ncols );
 figure, imshowpair(In,Irec_gen,'montage')
 
-% for ii=1:opts.maxiter
-%     norm(u_admmF(:,ii)-u_iter(ii).x)
-%     norm(statsF.z_iter(:,ii)-u_iter(ii).z)
-% end
+for ii=1:opts.maxiter
+    norm(u_admmF(:,ii)-u_iter(ii).x)
+    norm(statsF.z_iter(:,ii)-u_iter(ii).z)
+end
