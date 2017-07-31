@@ -34,7 +34,7 @@ end
       s = s0.*( bAbs > kron(l0,ones(ncols,1)));
       sN = sum_blocks(s.*s);
       sb = sum_blocks(s.*b);
-      
+      l=l0;
       
 % =================================
 
