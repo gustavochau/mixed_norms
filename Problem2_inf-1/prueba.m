@@ -5,7 +5,7 @@ close all;
 N = 5;
 M = 5;
 B = (rand(N,M));
-lambda = 0.1;
+lambda = 01;
 
 % %% CVX solution to corroborate results
 cvx_begin
@@ -21,8 +21,8 @@ cvx_end
 norma_B = max(sum(abs(B),2));
 
 jj=1;
-% possible_t = (0.9*norma_B:0.1:1.2*norma_B)*lambda;
-possible_t = linspace(0.95*norma_B*lambda,1.1*norma_B*lambda,50);
+% possible_t = (0:0.01:norma_B)*lambda;
+possible_t = linspace(0*norma_B*lambda,1.1*norma_B*lambda,50);
 for t = possible_t
     cvx_begin
     variable A_prueba(N,M)
@@ -31,7 +31,7 @@ for t = possible_t
         (sum(abs(A_prueba),2)) <= t/lambda;
     cvx_end
 %     [A_prueba] = batch_projL1AccNewton(B, t/lambda, 10);
-    costo(jj) = 0.5*sum_square( B(:) - A_prueba(:)) + lambda*max(sum(abs(A_prueba)));
+    costo(jj) = 0.5*sum_square( B(:) - A_prueba(:)) + lambda*max(sum(abs(A_prueba),2));
     a_store{jj} = A_prueba;
     jj = jj+1;
 end

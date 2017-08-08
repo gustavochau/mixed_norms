@@ -16,7 +16,7 @@ loops = zeros(nrows,1);
 A = zeros(nrows,ncols);
 
 for ii=1:nrows
-    [x, ~, loops(ii)] = projL1AccNewton(B(ii,:)', lambda, nMaxIter);
+    [x] = projL1Mich(B(ii,:)', lambda, nMaxIter);
     A(ii,:) = B(ii,:) - x';
 end
 
