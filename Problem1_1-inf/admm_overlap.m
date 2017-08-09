@@ -1,4 +1,4 @@
-function [u_iter,stats,loops] = generalADMM(matrices, func_costo, solvers,  params, opts)
+function [u_iter,stats,loops] = admm_overlap(y, groups, handle_mixed_norm , solver_mixed_norm, opts)
 %MYADMM Resuelve el problema de regularizacion
 % PARÁMETROS DE ENTRADA
 % =====================
@@ -25,43 +25,40 @@ function [u_iter,stats,loops] = generalADMM(matrices, func_costo, solvers,  para
 % Inicializar z y v y otras variable
 % ====================
 
-%inicializacion
+%inicialization
+N = length(groups); % number of rows = number of groups
+M = length(y); % number of columns = number of elements in target variable
+mat_form = @(w) reshape(w,[M,N])'; % function for reshaping vectorized variable ROW-WISE
 
-A = matrices{1};
-B = matrices{2};
-c = matrices{3};
-AT = matrices{4}; %operador traspuesto
-
-
-if(~isa(A,'function_handle'))
-    A = @(w) matrices{1}*w;
-end
-
-if(~isa(AT,'function_handle'))
-    AT = @(w) matrices{4}*w;
-end
-
-if(~isa(B,'function_handle'))
-    B = @(w) matrices{2}*w;
-end
-
-solveX = solvers{1};
-solveZ = solvers{2};
-mat_form=params.mat_form;
-% u_iter = zeros(size(x0,1),opts.maxiter); % array donde se guarda
-
+% history variables
 costo = zeros(opts.maxiter,1);
 costo_aumentada = zeros(opts.maxiter,1);
 rho_hist = zeros(opts.maxiter,1);
 tiempo = zeros(opts.maxiter,1);
+primal_res = zeros(opts.maxiter,1);
+dual_res = zeros(opts.maxiter,1);
 
-x = opts.x0; % primera variable primal
-z = opts.z0; % segunda variable primal
-v = zeros(size(c)); % variable dual
+% variables and parameters for admm
+x = zeros(M,1); % first primal variable
+z = zeros(N*M,1); % second primal variable
+v = zeros(N*M,1); % dual variable
 rho = opts.rho0;
-
-func_costo_aumentada = @(x1,z1,v1,rho1) func_costo(x1,z1) + (rho1/2)*norm(vec(A(diag(x))')+B(z1)-c+v1,2) - (rho1/2)*norm(v1);
+lambda = opts.lambda;
 loops=opts.maxiter;
+
+G = zeros(N,M); % G matrix whose (i,j) element is 1 if j-th coordinate in y belongs to the i-th group
+for ii=1:N
+    G(ii,groups{ii})=1;
+end
+
+H = []; % H matrix that vectorizes the operation in G in a ROW-WISE fashion
+for ii=1:N
+    H = [H; spdiags(G(ii,:)', 0, M,M)];
+end    
+
+func_costo = @(x1) 0.5* sum((x1-y).^2) + lambda*handle_mixed_norm(G*diag(x1));
+aug_func_costo = @(x1,z1,rho1) 0.5* sum((x1-y).^2) + lambda*handle_mixed_norm(mat_form(z1))+ 0.5*rho1*sum((H*x1-z1).^2);
+
 
 for k=1:opts.maxiter
     
@@ -70,60 +67,56 @@ for k=1:opts.maxiter
     % ==================================
     % Calcular valor de la función costo
     % ==================================
-    costo(k) = func_costo(x,z);
-    
-    costo_aumentada(k) =func_costo_aumentada(x,z,v,rho);
-        if (opts.verbose)
-            disp(['Total: ' num2str( costo_aumentada(k))])
-        end    
+    costo(k) = func_costo(x);
+    costo_aumentada(k) =aug_func_costo(x,z,rho);
+
+%     if (opts.verbose)
+%         disp(['Total: ' num2str( costo_aumentada(k))])
+%     end    
     t0 = tic; % inicio de contador de tiempo
     
     % =================
     % x update
     % =================
-%     x_anterior=x;
-    x = solveX(x,z,A,B,c,v,rho,params, AT);
-%         norm(x-x_anterior)
-
+    x = xupdate_1inf_overlap( x,z,v,y,rho,H);
+    
     if (opts.verbose)
-    disp(['x actualizado: ' num2str(func_costo_aumentada(x,z,v,rho))])
+        disp(['x actualizado: ' num2str(aug_func_costo(x,z,rho))])
     end
+    
     % =================
     % z update
     % =================
     z_anterior = z;
-    z = solveZ(x,z,A,B,c,v,rho,params, AT);
+    z = solver_mixed_norm( x,v,rho,lambda,G,mat_form);
     if (opts.verbose)
-    disp(['z actualizado: ' num2str(func_costo_aumentada(x,z,v,rho))])
+        disp(['z actualizado: ' num2str(aug_func_costo(x,z,rho))])
     end
+    
     % ============================================
-    % update of scales dual variables
+    % update of scaled dual variable
     % ============================================
-%         v_anterior = v;
-%     A = @(w) params.L*(sign(x).*w);
-    v = v + vec((A(diag(x))')) + B(z) - c;
-%                 norm(v-v_anterior)
+    v = v + H*x-z;
+    
     if (opts.verbose)
 
-        disp(['v actualizado: ' num2str(func_costo_aumentada(x,z,v,rho))])
+        disp(['v actualizado: ' num2str(aug_func_costo(x,z,rho))])
     end
     % ============================================
-    % Condiciones de parada
+    % Stopping criteria
     % ============================================    
     
-    primal_res = norm(vec(A(diag(x))') + B(z) - c);
-    dual_res = norm(rho*AT(params.mat_form(B(z-z_anterior))));
-    
-    eps_primal= sqrt(numel(c))*opts.tol(1)+opts.tol(2)*max([norm(vec(A(diag(x))'),'fro') norm(B(z),'fro') norm(c,'fro')]); % tolerancia para residuo primal
-    eps_dual=sqrt(numel(x))*opts.tol(1)+opts.tol(2)*norm(AT(mat_form(rho*v)),'fro'); % tolerancia para residuo dual
+    primal_res(k) = norm(H*x-z,2);
+    dual_res(k) = norm(rho*H'*(z-z_anterior),2);
+   
+    eps_primal(k)= sqrt(N*M)*opts.tol(1)+opts.tol(2)*max([norm(H*x,2),norm(z,2)]); % tolerancia para residuo primal
+    eps_dual(k)=sqrt(M)*opts.tol(1)+opts.tol(2)*norm(H'*rho*v,2); % tolerancia para residuo dual
     
     tiempo(k) = toc(t0);
     u_iter(k).x = x;
     u_iter(k).z = z;
     
-
-    
-    if ((primal_res <= eps_primal)  && (dual_res<=eps_dual))
+    if ((primal_res(k) <= eps_primal(k))  && (dual_res(k)<=eps_dual(k)))
         disp('Se alcanzaron condiciones de parada')
         loops = k;
         break;
@@ -159,4 +152,8 @@ stats.cost = costo;
 stats.costo_aumentada = costo_aumentada;
 stats.time = tiempo;
 stats.rho = rho_hist;
+stats.primal_res=primal_res;
+stats.dual_res=dual_res;
+stats.eps_primal=eps_primal;
+stats.eps_dual = eps_dual;
 end

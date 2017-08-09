@@ -7,7 +7,7 @@ num_groups = 50;
 y = rand(N,1);
 
 % create indices
-rng(8)
+% rng(8)
 for ii=1:num_groups
     p = randperm(N);
     g_index{ii} = p(1:randi(N/2,1,1));
@@ -65,32 +65,36 @@ end
 % x_admm=full(diag(x));
 % max(abs(x_admm-x_cvx))
 
+% 
+% z = zeros(num_groups*N,1);
+% v = zeros(num_groups*N,1);
+% costo_func = @(x1,z1) 0.5*sum_square(y-x1)+lambda*compute_mixed_norm( reshape(z1,N,num_groups)',1,inf)+0.5*rho*sum_square(H*x1-z1);
+max_iter = 100;
+% 
+% for jj=1:max_iter
+% 
+%     x = cvx_x_2( y,rho,z,H,v,N );
+%     disp(['x update:' num2str(costo_func(x,z))])
+%     %% z update
+%     z_anterior = z;
+%     z = cvx_z_2( rho,x,G,v,num_groups,N ,lambda);
+%     disp(['z update:' num2str(costo_func(x,z))])
+%     v = v+H*x-z;
+%     disp(['v update:' num2str(costo_func(x,z))])
+% 
+%     
+%     costo(jj) = costo_func(x,z);
+% 
+%     
+%     primal_res(jj) = norm(H*x - z,'fro');
+%     dual_res(jj) = norm(rho*H'*(z-z_anterior),'fro');
+%     
+% end
+% x_admm_cvx=x;
+% max(abs(x_admm_cvx-x_cvx))
 
-z = zeros(num_groups*N,1);
-v = zeros(num_groups*N,1);
+[x_my_admm,stats,u_iter] = admm_1_inf_overlap(y,g_index,lambda,max_iter);
+max(abs(x_my_admm-x_cvx))
 
 
-costo_func = @(x1,z1) 0.5*sum_square(y-x1)+lambda*compute_mixed_norm( reshape(z1,N,num_groups)',1,inf)+0.5*rho*sum_square(H*x1-z1);
-
-for jj=1:50
-
-    x = cvx_x_2( y,rho,z,H,v,N );
-    disp(['x update:' num2str(costo_func(x,z))])
-    %% z update
-    z_anterior = z;
-    z = cvx_z_2( rho,x,G,v,num_groups,N ,lambda);
-    disp(['z update:' num2str(costo_func(x,z))])
-    v = v+H*x-z;
-    disp(['v update:' num2str(costo_func(x,z))])
-
-    
-    costo(jj) = costo_func(x,z);
-
-    
-    primal_res(jj) = norm(H*x - z,'fro');
-    dual_res(jj) = norm(rho*H'*(z-z_anterior),'fro');
-    
-end
-x_admm=x;
-max(abs(x_admm-x_cvx))
 
