@@ -1,5 +1,5 @@
-function [u_iter,stats,loops] = admm_overlap(y, groups, handle_mixed_norm , solver_mixed_norm, opts)
-%MYADMM Resuelve el problema de regularizacion
+function [u_iter,stats,loops] = my_admm_inf_1(B,lambda, opts)
+%MYADMM Solves 0.5*||A-B||_F^2 + lambda * ||A||_{inf,1}
 % PARÁMETROS DE ENTRADA
 % =====================
 %      matrices: Celda con las matrices A,B, C o los handles a las funciones que implementan Ax, Bz
@@ -26,8 +26,8 @@ function [u_iter,stats,loops] = admm_overlap(y, groups, handle_mixed_norm , solv
 % ====================
 
 %inicialization
-N = length(groups); % number of rows = number of groups
-M = length(y); % number of columns = number of elements in target variable
+[N,M] = size(B); % N number of groups
+beta = vec(B');
 mat_form = @(w) reshape(w,[M,N])'; % function for reshaping vectorized variable ROW-WISE
 
 % history variables
@@ -39,36 +39,29 @@ primal_res = zeros(opts.maxiter,1);
 dual_res = zeros(opts.maxiter,1);
 
 % variables and parameters for admm
-x = zeros(M,1); % first primal variable
-z = zeros(N*M,1); % second primal variable
-v = zeros(N*M,1); % dual variable
+alpha = rand(N*M,1); % first primal variable
+z = zeros(N,1); % second primal variable
+v = zeros(N,1); % dual variable
 rho = opts.rho0;
-lambda = opts.lambda;
 loops=opts.maxiter;
+L = kron(speye(N),ones(1,M));
+S = sparse(diag(sign(alpha)));
 
-G = zeros(N,M); % G matrix whose (i,j) element is 1 if j-th coordinate in y belongs to the i-th group
-for ii=1:N
-    G(ii,groups{ii})=1;
-end
-
-H = []; % H matrix that vectorizes the operation in G in a ROW-WISE fashion
-for ii=1:N
-    H = [H; spdiags(G(ii,:)', 0, M,M)];
-end    
-
-func_costo = @(x1) 0.5* sum((x1-y).^2) + lambda*handle_mixed_norm(G*diag(x1));
-aug_func_costo = @(x1,z1,rho1) 0.5* sum((x1-y).^2) + lambda*handle_mixed_norm(mat_form(z1))+ 0.5*rho1*sum((H*x1-z1).^2);
+func_costo = @(x1) 0.5* sum((x1-beta).^2) + lambda*compute_mixed_norm(mat_form(alpha),inf,1);
+aug_func_costo = @(x1,z1,rho1) 0.5* sum((x1-beta).^2) + lambda*norm(z1,inf)+ 0.5*rho1*sum((L*S*x1-z).^2);
 
 
 for k=1:opts.maxiter
+    
     if (opts.verbose)
-    disp(['Iteración ' num2str(k) ' de ADMM'])
+        disp(['Iteración ' num2str(k) ' de ADMM'])
     end
+    
     % ==================================
     % Calcular valor de la función costo
     % ==================================
-    costo(k) = func_costo(x);
-    costo_aumentada(k) =aug_func_costo(x,z,rho);
+    costo(k) = func_costo(alpha);
+    costo_aumentada(k) =aug_func_costo(alpha,z,rho);
 
 %     if (opts.verbose)
 %         disp(['Total: ' num2str( costo_aumentada(k))])
@@ -78,42 +71,45 @@ for k=1:opts.maxiter
     % =================
     % x update
     % =================
-    x = xupdate_1inf_overlap( x,z,v,y,rho,H);
+%     alpha = xupdate_1inf_overlap( alpha,z,v,beta,rho,H);
+    alpha=cvx_x(beta,rho,z,L,S,v,N,M);
     
     if (opts.verbose)
-        disp(['x actualizado: ' num2str(aug_func_costo(x,z,rho))])
+        disp(['x actualizado: ' num2str(func_costo(alpha))])
     end
+    S = sparse(diag(sign(alpha)));
     
     % =================
     % z update
     % =================
     z_anterior = z;
-    z = solver_mixed_norm( x,v,rho,lambda,G,mat_form);
+    z = cvx_z(alpha,rho,L,S,v,N,lambda);
+%     z = solver_mixed_norm( alpha,v,rho,lambda,G,mat_form);
     if (opts.verbose)
-        disp(['z actualizado: ' num2str(aug_func_costo(x,z,rho))])
+        disp(['z actualizado: ' num2str(func_costo(alpha))])
     end
     
     % ============================================
     % update of scaled dual variable
     % ============================================
-    v = v + H*x-z;
+    v = v + L*S*alpha-z;
     
     if (opts.verbose)
 
-        disp(['v actualizado: ' num2str(aug_func_costo(x,z,rho))])
+        disp(['v actualizado: ' num2str(func_costo(alpha))])
     end
     % ============================================
     % Stopping criteria
     % ============================================    
     
-    primal_res(k) = norm(H*x-z,2);
-    dual_res(k) = norm(rho*H'*(z-z_anterior),2);
+    primal_res(k) = norm(L*(abs(alpha))-z,2);
+    dual_res(k) = norm(rho*S'*L'*(z-z_anterior),2);
    
-    eps_primal(k)= sqrt(N*M)*opts.tol(1)+opts.tol(2)*max([norm(H*x,2),norm(z,2)]); % tolerancia para residuo primal
-    eps_dual(k)=sqrt(M)*opts.tol(1)+opts.tol(2)*norm(H'*rho*v,2); % tolerancia para residuo dual
+    eps_primal(k)= sqrt(N*M)*opts.tol(1)+opts.tol(2)*max([norm(L*(abs(alpha)),2),norm(z,2)]); % tolerancia para residuo primal
+    eps_dual(k)=sqrt(M)*opts.tol(1)+opts.tol(2)*norm(rho*S'*L'*v,2); % tolerancia para residuo dual
     
     tiempo(k) = toc(t0);
-    u_iter(k).x = x;
+    u_iter(k).x = alpha;
     u_iter(k).z = z;
     
     if ((primal_res(k) <= eps_primal(k))  && (dual_res(k)<=eps_dual(k)))

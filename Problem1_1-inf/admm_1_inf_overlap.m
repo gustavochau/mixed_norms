@@ -7,7 +7,7 @@ function [x_admm,stats,u_iter] = admm_1_inf_overlap(y,groups,lambda,maxiter)
     opts.parrho = [5 1.5 1.5];
     opts.rhoopt = 'fix'; % opción de rho
     opts.lambda = lambda;
-    opts.verbose = 1;
+    opts.verbose = 0;
 
     handle_mixed_norm = @(W) compute_mixed_norm(W,1,inf);
     solver_mixed_norm = @zupdate_1inf_overlap;

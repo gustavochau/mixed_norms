@@ -1,21 +1,29 @@
 clc;
-clear;
+clear all;
 close all;
 
-N = 30;
-num_groups = 50;
+    
+N = 80;
+num_groups = 100;
+
+for pp=1:100
+pp
+
 y = rand(N,1);
 
 % create indices
 % rng(8)
 for ii=1:num_groups
     p = randperm(N);
+%     g_index{ii} = p(1:randi(N,1,1));
     g_index{ii} = p(1:randi(N/2,1,1));
 end
 
+
+
 lambda = 0.1;
 
-cvx_begin
+cvx_begin quiet
     variable x_cvx(N,1)
     Mixed_norm = 0;
     for ii=1:num_groups
@@ -36,6 +44,9 @@ G = zeros(num_groups,N);
 for ii=1:num_groups
     G(ii,g_index{ii})=1;
 end
+
+rep_group(pp)=mean(sum(G,1));    
+size_group(pp)=mean(sum(G,2));
 
 H = [];
 for ii=1:num_groups
@@ -92,9 +103,12 @@ max_iter = 100;
 % end
 % x_admm_cvx=x;
 % max(abs(x_admm_cvx-x_cvx))
-
+tic
 [x_my_admm,stats,u_iter] = admm_1_inf_overlap(y,g_index,lambda,max_iter);
-max(abs(x_my_admm-x_cvx))
+times_admm(pp) = toc;
+num_loops(pp)=stats.loops;  
+error(pp) = max(abs(x_my_admm-x_cvx));
 
 
+end
 
