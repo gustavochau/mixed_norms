@@ -1,4 +1,4 @@
-function [ z ] = cvx_z( y,rho,x,G,v,num_groups,N ,lambda)
+function [ z_v ] = cvx_z_2( rho,x,G,v,num_groups,N ,lambda)
 %CVX_X Summary of this function goes here
 %   Detailed explanation goes here
         %% x update
@@ -8,8 +8,9 @@ function [ z ] = cvx_z( y,rho,x,G,v,num_groups,N ,lambda)
         for ii=1:num_groups
             Mixed_norm = Mixed_norm + norm(z(ii,:),Inf);
         end
-        minimize( rho*0.5*sum_square( vec(G*x-z+v)) + lambda*Mixed_norm)
+        minimize( rho*0.5*sum_square(vec(G*diag(x) -z + reshape(v,N,num_groups)')) + lambda*Mixed_norm)
     cvx_end
 
+    z_v = vec(z');
 end
 

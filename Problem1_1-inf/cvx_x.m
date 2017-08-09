@@ -3,8 +3,8 @@ function [ x ] = cvx_x( y,rho,z,G,v,N )
 %   Detailed explanation goes here
         %% x update
     cvx_begin quiet
-        variable x(N,1)
-        minimize( 0.5*sum_square( y-x) + 0.5*rho*sum_square(vec(z-G*diag(x)+v)))
+        variable x(N,N) diagonal
+        minimize( 0.5*sum_square( vec(y-x)) + 0.5*rho*sum_square(vec(G*x-z+v)))
     cvx_end
 
 end
