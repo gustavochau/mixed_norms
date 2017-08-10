@@ -3,12 +3,12 @@ clear all;
 close all;
 
     
-N = 80;
-num_groups = 100;
+N = 30;
+num_groups = 10;
 
-for pp=1:100
+for pp=1:1
 pp
-
+rng(10)
 y = rand(N,1);
 
 % create indices

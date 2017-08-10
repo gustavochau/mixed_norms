@@ -1,5 +1,5 @@
-function[x, l, loops] = projL1Mich(b, tau, nMaxIter, myErr)
-
+function[x, loops] = projL1Mich(b, tau, nMaxIter, myErr)
+loops=1;
 if nargin < 4
   myErr = 1e-8;
 end
@@ -31,14 +31,12 @@ end
       
       
       
-      
 % =================================
 
 for k=1:nMaxIter
 
       
     if sN == sN0
-        l=l0;
       break;
     end    
     

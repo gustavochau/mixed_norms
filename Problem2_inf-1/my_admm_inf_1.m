@@ -39,7 +39,7 @@ primal_res = zeros(opts.maxiter,1);
 dual_res = zeros(opts.maxiter,1);
 
 % variables and parameters for admm
-alpha = rand(N*M,1); % first primal variable
+alpha = zeros(N*M,1); % first primal variable
 z = zeros(N,1); % second primal variable
 v = zeros(N,1); % dual variable
 rho = opts.rho0;
@@ -71,9 +71,8 @@ for k=1:opts.maxiter
     % =================
     % x update
     % =================
-%     alpha = xupdate_1inf_overlap( alpha,z,v,beta,rho,H);
-    alpha=cvx_x(beta,rho,z,L,S,v,N,M);
-    
+%     alpha=cvx_x(beta,rho,z,L,S,v,N,M);
+    alpha = xupdate_1inf( alpha,z,v,beta,rho,L,S);
     if (opts.verbose)
         disp(['x actualizado: ' num2str(func_costo(alpha))])
     end
@@ -83,7 +82,8 @@ for k=1:opts.maxiter
     % z update
     % =================
     z_anterior = z;
-    z = cvx_z(alpha,rho,L,S,v,N,lambda);
+%     z = cvx_z(alpha,rho,L,S,v,N,lambda);
+    z = zupdate_1inf( alpha,v,rho,lambda,L,S);
 %     z = solver_mixed_norm( alpha,v,rho,lambda,G,mat_form);
     if (opts.verbose)
         disp(['z actualizado: ' num2str(func_costo(alpha))])
