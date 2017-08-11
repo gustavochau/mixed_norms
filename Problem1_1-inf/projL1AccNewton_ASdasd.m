@@ -15,7 +15,7 @@ sN0 = length(b(:));
 xnorm = bnorm;
 
 
-if bnorm <= tau
+if bnorm <= tau % if b belongs to ball then b is the solution
   x = b;
   return;
 end
@@ -28,8 +28,6 @@ end
       s = s0.*(bAbs>l0);
       sN = s'*s;
       sb = s'*b;
-      
-      
       
       
 % =================================

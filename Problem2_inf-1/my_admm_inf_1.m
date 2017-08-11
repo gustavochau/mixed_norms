@@ -39,8 +39,8 @@ primal_res = zeros(opts.maxiter,1);
 dual_res = zeros(opts.maxiter,1);
 
 % variables and parameters for admm
-alpha = zeros(N*M,1); % first primal variable
-z = zeros(N,1); % second primal variable
+alpha = rand(N*M,1); % first primal variable
+z = rand(N,1); % second primal variable
 v = zeros(N,1); % dual variable
 rho = opts.rho0;
 loops=opts.maxiter;

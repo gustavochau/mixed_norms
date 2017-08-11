@@ -2,10 +2,10 @@ clc;
 clear all;
 close all;
 
-N = 100;
+N = 50;
 M = 20;
 
-num_test = 50;
+num_test = 1;
 
 for pp=1:num_test
 pp
@@ -13,7 +13,7 @@ B = (rand(N,M));
 lambda = 0.1;
 
 % %% CVX solution to corroborate results
-cvx_begin quiet
+cvx_begin 
     variable A_cvx(N,M)
     expression row_norm(N)
     for ii=1:N
@@ -25,7 +25,7 @@ cvx_end
 
 
 opts.maxiter = 50; % máximo número de iteraciones
-opts.rho0 = 10; % rho inicial
+opts.rho0 = 1; % rho inicial
 opts.tol = [1E-4 1E-2]; % [tolerancia absoluta  tolerancia_relativa]
 opts.parrho = [5 1.5 1.5];
 opts.rhoopt = 'fix'; % opción de rho

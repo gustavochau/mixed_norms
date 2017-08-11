@@ -1,4 +1,4 @@
-function[x, loops] = projL1Mich(b, tau, nMaxIter, myErr)
+function[x, l,loops] = projL1Mich(b, tau, nMaxIter, myErr)
 loops=1;
 if nargin < 4
   myErr = 1e-8;
