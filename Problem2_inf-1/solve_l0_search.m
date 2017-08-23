@@ -1,10 +1,10 @@
-function [ A_prueba, costo ] = solve_l0_search( B,lambda,possible_t)
+function [ A_prueba, costo,tau_opt] = solve_l0_search( B,lambda,possible_t)
 %SOLVE_L0_SEARCH Summary of this function goes here
 %   Detailed explanation goes here
     jj=1;
     [N,M] = size(B);
     A_prueba = zeros(N,M);
-    costo = zeros(N,1);
+    costo = zeros(length(possible_t),1);
     for t = possible_t
         for ii=1:N
             [A_prueba(ii,:)] = MP_l0(B(ii,:), t/lambda);
