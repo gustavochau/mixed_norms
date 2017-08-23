@@ -1,4 +1,4 @@
-function [u_iter,stats,loops] = my_admm_inf_1(B,lambda, opts)
+function [u_iter,stats,loops] = my_admm_inf_1_v2(B,lambda, opts)
 %MYADMM Solves 0.5*||A-B||_F^2 + lambda * ||A||_{inf,1}
 % PARÁMETROS DE ENTRADA
 % =====================
@@ -45,7 +45,13 @@ v = zeros(N,1); % dual variable
 rho = opts.rho0;
 loops=opts.maxiter;
 L = kron(speye(N),ones(1,M));
-S = sparse(diag(sign(beta)));
+S = spdiags(sign(beta),0,N*M,N*M);
+LS = L*S; 
+LS_t = S*L';
+mat_final = speye(N*M) +rho*LS_t*(LS);
+A = chol(mat_final,'lower');
+A_t = A';
+
 
 func_costo = @(x1) 0.5* sum((x1-beta).^2) + lambda*compute_mixed_norm(mat_form(alpha),inf,1);
 aug_func_costo = @(x1,z1,rho1) 0.5* sum((x1-beta).^2) + lambda*norm(z1,inf)+ 0.5*rho1*sum((L*S*x1-z).^2);
@@ -61,7 +67,7 @@ for k=1:opts.maxiter
     % Calcular valor de la función costo
     % ==================================
     costo(k) = func_costo(alpha);
-    costo_aumentada(k) =aug_func_costo(alpha,z,rho);
+%     costo_aumentada(k) =aug_func_costo(alpha,z,rho);
 
 %     if (opts.verbose)
 %         disp(['Total: ' num2str( costo_aumentada(k))])
@@ -72,7 +78,7 @@ for k=1:opts.maxiter
     % x update
     % =================
 %     alpha=cvx_x(beta,rho,z,L,S,v,N,M);
-    alpha = xupdate_1inf( alpha,z,v,beta,rho,L,S);
+    alpha = xupdate_1inf_v2( alpha,z,v,beta,rho,A,A_t,LS_t);
     if (opts.verbose)
         disp(['x actualizado: ' num2str(func_costo(alpha))])
     end
@@ -83,7 +89,7 @@ for k=1:opts.maxiter
     % =================
     z_anterior = z;
 %     z = cvx_z(alpha,rho,L,S,v,N,lambda);
-    z = zupdate_1inf( alpha,v,rho,lambda,L,S);
+    z = zupdate_1inf_v2( alpha,v,rho,lambda,LS);
 %     z = solver_mixed_norm( alpha,v,rho,lambda,G,mat_form);
     if (opts.verbose)
         disp(['z actualizado: ' num2str(func_costo(alpha))])
@@ -92,7 +98,7 @@ for k=1:opts.maxiter
     % ============================================
     % update of scaled dual variable
     % ============================================
-    v = v + L*S*alpha-z;
+    v = v + LS*(alpha)-z;
     
     if (opts.verbose)
 
@@ -102,11 +108,11 @@ for k=1:opts.maxiter
     % Stopping criteria
     % ============================================    
     
-    primal_res(k) = norm(L*(abs(alpha))-z,2);
-    dual_res(k) = norm(rho*S'*L'*(z-z_anterior),2);
+    primal_res(k) = norm(LS*(alpha)-z,2);
+    dual_res(k) = norm(rho*LS_t*(z-z_anterior),2);
    
-    eps_primal(k)= sqrt(N*M)*opts.tol(1)+opts.tol(2)*max([norm(L*(abs(alpha)),2),norm(z,2)]); % tolerancia para residuo primal
-    eps_dual(k)=sqrt(M)*opts.tol(1)+opts.tol(2)*norm(rho*S'*L'*v,2); % tolerancia para residuo dual
+    eps_primal(k)= sqrt(N*M)*opts.tol(1)+opts.tol(2)*max([norm(LS*(alpha),2),norm(z,2)]); % tolerancia para residuo primal
+    eps_dual(k)=sqrt(M)*opts.tol(1)+opts.tol(2)*norm(rho*LS_t*v,2); % tolerancia para residuo dual
     
     tiempo(k) = toc(t0);
     u_iter(k).x = alpha;
@@ -145,7 +151,7 @@ end
 % ==================================
 
 stats.cost = costo;
-stats.costo_aumentada = costo_aumentada;
+% stats.costo_aumentada = costo_aumentada;
 stats.time = tiempo;
 stats.rho = rho_hist;
 stats.primal_res=primal_res;

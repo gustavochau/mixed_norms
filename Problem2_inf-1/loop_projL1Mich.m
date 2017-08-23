@@ -7,7 +7,7 @@ loops = zeros(nrows,1);
 A = zeros(nrows,ncols);
 
 for ii=1:nrows
-    [x, l(ii), loops(ii)] = projL1Mich(B(ii,:)', lambda, nMaxIter);
+    [x, loops(ii)] = projL1Mich(B(ii,:)', lambda, nMaxIter);
     A(ii,:) = x';
 end
 

@@ -3,10 +3,12 @@ clear;
 close all;
 
 N = 50;
-M = 10;
+M = 30;
 B = (rand(N,M)-0.5);
 lambda = 0.1;
 shrink = @(u,ll) sign(u).*max(abs(u)-ll,0);
+hard_thresh = @(u,ll) u.*(abs(u)>ll);
+norm0 = @(u) sum(abs(u)>0.0001);
 
 % %% CVX solution to corroborate results
 cvx_begin
@@ -19,11 +21,11 @@ cvx_begin
     minimize(0.5*sum_square( B(:) - A_cvx(:)) + lambda* Mixed_norm )
 cvx_end
 
-norma_B = max(sum(abs(B),2));
+norma_B = max(sum(abs(B)>0.0001,2));
 
 % possible_t = (0:0.01:norma_B)*lambda;
 for jj=1:N
-    tau_1_l(jj) = norm(shrink(B(jj,:),lambda),1);
+    tau_1_l(jj) = norm0(hard_thresh(B(jj,:),sqrt(2*lambda)));
 end
 tau_1 = max(tau_1_l);
 
@@ -37,8 +39,12 @@ for t = possible_t
 %     subject to
 %         (sum(abs(A_prueba),2)) <= t/lambda;
 %     cvx_end
-    [A_prueba] = loop_projL1Mich(B, t/lambda, 20);
-    costo(jj) = 0.5*sum_square( B(:) - A_prueba(:)) + lambda*max(sum(abs(A_prueba),2));
+
+    for ii=1:N
+        [A_prueba(ii,:)] = MP_l0(B(ii,:), t/lambda);
+    end
+    
+    costo(jj) = 0.5*sum_square( B(:) - A_prueba(:)) + lambda*max(sum(abs(A_prueba)>0.0001,2));
     a_store{jj} = A_prueba;
     jj = jj+1;
 end
@@ -47,7 +53,7 @@ end
 
 [tau_opt,ind] = min(costo);
 A_prueba = a_store{ind};
-plot(costo)
+plot(possible_t/lambda,costo)
 max(abs(A_prueba(:)-A_cvx(:)))
 
 compute_mixed_norm(B-A_prueba,1,inf)-lambda
