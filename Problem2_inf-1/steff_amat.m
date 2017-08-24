@@ -1,6 +1,6 @@
 function [x,x_hist,error,iter]=steff_amat(f,x0,tol,max_iter,tol_u)
 
-tol_c = 1E-10;
+tol_c = 1E-12;
 x=x0;
 iter = max_iter;
 for ii=1:max_iter
