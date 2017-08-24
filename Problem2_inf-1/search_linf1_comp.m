@@ -2,13 +2,13 @@ clc;
 clear;
 close all;
 
-N = 10000;
-M = 300;
+N = 2000;
+M = 100;
 % rng(3);
 
 shrink = @(u,ll) sign(u).*max(abs(u)-ll,0);
 
-num_real = 20;
+num_real = 100;
 
 errores = zeros(num_real,2);
 tiempo = zeros(num_real,2);
