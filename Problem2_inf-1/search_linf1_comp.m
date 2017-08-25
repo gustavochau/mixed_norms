@@ -2,16 +2,16 @@ clc;
 clear;
 close all;
 
-N = 2000;
-M = 100;
+N = 100;
+M = 20;
 % rng(3);
 
 shrink = @(u,ll) sign(u).*max(abs(u)-ll,0);
 
 num_real = 100;
 
-errores = zeros(num_real,3);
-tiempo = zeros(num_real,3);
+errores = zeros(num_real,2);
+tiempo = zeros(num_real,2);
 
 for zz=1:num_real
 %     rng(5*zz)
@@ -31,16 +31,16 @@ for zz=1:num_real
     iter_num(zz,2) = iter;
     clear X_stef A_stef;
     
-    tic
-    norma_B = max(sum(abs(B),2));
-    [~,ib]=max(sum(abs(B),2));
-    tau_1 = norm(shrink(B(ib,:),lambda),1);
-    [ A_stef, tau_opt_stef,iter] = solve_l1_search_fzero( B,lambda, tau_1);
-    X_stef = B-A_stef;
-    tiempo(zz,3) = toc;
-    errores(zz,3) = abs(compute_mixed_norm(X_stef,1,inf)-lambda);
-    iter_num(zz,3) = iter;
-    clear X_stef A_stef;
+%     tic
+%     norma_B = max(sum(abs(B),2));
+%     [~,ib]=max(sum(abs(B),2));
+%     tau_1 = norm(shrink(B(ib,:),lambda),1);
+%     [ A_stef, tau_opt_stef,iter] = solve_l1_search_fzero( B,lambda, tau_1);
+%     X_stef = B-A_stef;
+%     tiempo(zz,3) = toc;
+%     errores(zz,3) = abs(compute_mixed_norm(X_stef,1,inf)-lambda);
+%     iter_num(zz,3) = iter;
+%     clear X_stef A_stef;
     
     tic
     [ X_sra, theta_opt, iter ] = solve_sra(B,lambda);
