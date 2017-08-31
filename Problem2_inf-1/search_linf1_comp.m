@@ -50,3 +50,5 @@ for zz=1:num_real
     clear X_sra
 
 end
+
+save(['results_' num2str(N) 'x' num2str(M)],'iter_num','errores','tiempo')
