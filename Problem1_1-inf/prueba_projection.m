@@ -2,11 +2,11 @@ clc;
 clear;
 close all;
 
-N = 10;
-rng(15)
+N = 1000;
+% rng(15)
 
-b = rand(N,1);
-tau = 0.5;
+b = rand(N,1)-0.5;
+tau = 0.1;
 
 % rng
 cvx_begin 
@@ -18,7 +18,7 @@ cvx_end
 
 
 [a_mich,lam_mich,l_mich] = projL1Mich(b, tau, 20);
-[a_newt,lam_newt,l_newt] = projL1AccNewton(b, tau, 20);
+[a_newt,lam_newt,l_newt] = projL1AccNewton_rfixed(b, tau, 20);
 
 max(abs(a_mich - a_cvx))
 
