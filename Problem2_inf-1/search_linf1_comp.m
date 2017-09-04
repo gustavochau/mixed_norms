@@ -2,8 +2,8 @@ clc;
 clear;
 close all;
 
-N = 500;
-M = 200;
+N = 2000;
+M = 100;
 % rng(3);
 
 shrink = @(u,ll) sign(u).*max(abs(u)-ll,0);
@@ -18,7 +18,7 @@ for zz=1:num_real
     zz
     
     B = (rand(N,M)-0.5);
-    lambda =0.1;
+    lambda =0.2;
 
     tic
     norma_B = max(sum(abs(B),2));
@@ -51,4 +51,4 @@ for zz=1:num_real
 
 end
 
-save(['results_' num2str(N) 'x' num2str(M)],'iter_num','errores','tiempo')
+save(['results_' num2str(N) 'x' num2str(M) '_lambda' num2str(lambda) '.mat'],'iter_num','errores','tiempo')
