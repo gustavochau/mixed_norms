@@ -5,8 +5,8 @@ close all;
 
 
 
-N = 500;
-M = 100;
+N = 50000;
+M = 1000;
 % rng(3);
 
 shrink = @(u,ll) sign(u).*max(abs(u)-ll,0);
@@ -15,7 +15,7 @@ num_real = 100;
 
 errores = zeros(num_real,2);
 tiempo = zeros(num_real,2);
-
+pp=1;
 for lambda =[0.05,0.1,0.2];
     lambda
     for zz=1:num_real
@@ -43,9 +43,11 @@ for lambda =[0.05,0.1,0.2];
         clear X_sra
         
         tic
-        norma_B = max(sum(abs(B),2));
-        [~,ib]=max(sum(abs(B),2));
-        tau_1 = norm(shrink(B(ib,:),lambda),1);
+        for ii=1:N
+            A_sur(ii,:) = shrink(B(ii,:),lambda);
+            costo(ii) = norm(A_sur(ii,:),1);
+        end
+        [tau_1] = max(costo);
         [ A_newt, tau_opt_stef,iter] = solve_l1_search_newton( B,lambda, tau_1);
         X_newt = B-A_newt;
         tiempo(zz,2) = toc;
@@ -54,9 +56,11 @@ for lambda =[0.05,0.1,0.2];
         clear X_newt A_newt;
         
         tic
-        norma_B = max(sum(abs(B),2));
-        [~,ib]=max(sum(abs(B),2));
-        tau_1 = norm(shrink(B(ib,:),lambda),1);
+        for ii=1:N
+            A_sur(ii,:) = shrink(B(ii,:),lambda);
+            costo(ii) = norm(A_sur(ii,:),1);
+        end
+        [tau_1] = max(costo);
         [ A_newt_prun, tau_opt_stef,iter] = solve_l1_search_newton_pruned( B,lambda, tau_1);
         X_newt_prun = B-A_newt_prun;
         tiempo(zz,3) = toc;
@@ -65,7 +69,8 @@ for lambda =[0.05,0.1,0.2];
         clear X_newt_prun A_newt_prun;
         
     end
-    resumen = [mean(errores)' mean(iter_num)' mean(tiempo)'];
+    resumen(:,:,pp) = [mean(errores)' mean(iter_num)' mean(tiempo)'];
+    pp=pp+1;
     save(['results_' num2str(N) 'x' num2str(M) '_lambda' num2str(lambda) '.mat'],'iter_num','errores','tiempo','resumen')
 
 end
