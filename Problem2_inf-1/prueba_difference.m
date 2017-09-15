@@ -19,29 +19,30 @@ possible_lambda = 0.01:0.01:0.3;
 for ll=1:length(possible_lambda)
      disp([num2str(ll) '/' num2str(length(possible_lambda))])
 
-    lambda = possible_lambda(ll);
+%     lambda = possible_lambda(ll)*compute_mixed_norm(B,1,inf);
     
     for zz=1:num_real
         %     rng(5*zz)
         
         B = ((rand(N,M)-0.5));
+        lambda = possible_lambda(ll)*compute_mixed_norm(B,inf,1);
+%         nb,index = sort(sum(abs(B),2),'descending');
         
-        nb,index = sort(sum(abs(B),2),'descending');
-        
-%         for ii=1:N
-%             A_sur(ii,:) = shrink(B(ii,:),lambda);
-%             costo(ii) = norm(A_sur(ii,:),1);
-%         end
-%         nb = sum(abs(B),2);
-%         [tau_1] = max(costo);
-%         num_may = sum(nb>tau_1);
-%         for ii=1:N
-%             A_sur(ii,:) = shrink(B(ii,:),2*lambda/num_may);
-%             costo(ii) = norm(A_sur(ii,:),1);
-%         end
-%         [tau_1] = max(costo);
+        for ii=1:N
+            A_sur(ii,:) = shrink(B(ii,:),lambda);
+            costo(ii) = norm(A_sur(ii,:),1);
+        end
+        nb = sum(abs(B),2);
+        [tau_1] = max(costo);
+        num_may = sum(nb>tau_1);
+        for ii=1:N
+            A_sur(ii,:) = shrink(B(ii,:),lambda);
+            costo(ii) = norm(A_sur(ii,:),1);
+        end
+        [tau_1] = max(costo);
         [ A_newt, tau_opt,iter] = solve_l1_search_newton( B,lambda, tau_1);
-        error(zz,ll) = tau_opt-tau_1;
+%         error(zz,ll) = tau_opt-tau_1;
+        error(zz,ll) = tau_opt - tau_1; %compute_mixed_norm(B,inf,1)*lambda;
         ratio(zz,ll) = error(zz,ll)/lambda;    
         mayores(zz,ll) = sum(nb>tau_opt);
     end

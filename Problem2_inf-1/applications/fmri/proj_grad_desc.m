@@ -1,4 +1,4 @@
-function [ x, num_iter ] = proj_grad_desc( x0, proj_op, grad_op, tol, max_iter, alpha)
+function [ x, num_iter ,hist,tiempo] = proj_grad_desc( x0, proj_op, grad_op, tol, max_iter, alpha)
 %PROJ_GRAD_DESC projected gradient descent routine. If step size alpha is not
 %provided, it uses the spectal stepsizes of Barzilai and Borwein
 %   Detailed explanation goes here
@@ -14,11 +14,18 @@ function [ x, num_iter ] = proj_grad_desc( x0, proj_op, grad_op, tol, max_iter, 
     g_old = grad_op(x0);
     num_iter = max_iter;
     for ii=1:max_iter
+        
         ii
+        tic
         g = grad_op(x);
-        x = proj_op(x-alpha*g);
+        
+        t = x-alpha*g;
+%         tic
+        x = proj_op(t);
+%         toc
         deltax=x(:)-x_old(:);
-        if (norm(deltax,2)) < tol*alpha
+        hist(ii)=norm(deltax,2);
+        if (norm(deltax,2)) < tol
             num_iter = ii;
             break
         end
@@ -28,6 +35,7 @@ function [ x, num_iter ] = proj_grad_desc( x0, proj_op, grad_op, tol, max_iter, 
 %             g_old = g;
 %         end
         x_old = x;
+        tiempo(ii)=toc;
     end
     
 
