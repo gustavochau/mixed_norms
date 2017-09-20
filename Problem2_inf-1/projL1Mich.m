@@ -3,6 +3,13 @@ loops=1;
 if nargin < 4
   myErr = 1e-8;
 end
+
+if tau==0
+    x = b*0;
+    l = 0;
+    return;
+end
+
 l=0;
 s0 = sign(b);
 bnorm = s0'*b;

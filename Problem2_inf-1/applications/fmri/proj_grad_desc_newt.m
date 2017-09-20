@@ -1,4 +1,4 @@
-function [ x, num_iter ,hist,tiempo,costo_hist] = proj_grad_desc( x0, proj_op, grad_op, tol, max_iter, alpha, costo)
+function [ x, num_iter ,hist,tiempo,costo_hist] = proj_grad_desc_newt( x0, proj_op, grad_op, tol, max_iter, alpha, costo)
 %PROJ_GRAD_DESC projected gradient descent routine. If step size alpha is not
 %provided, it uses the spectal stepsizes of Barzilai and Borwein
 %   Detailed explanation goes here
@@ -21,12 +21,7 @@ function [ x, num_iter ,hist,tiempo,costo_hist] = proj_grad_desc( x0, proj_op, g
         
         t = x-alpha*g;
 %         tic
-        if ii>=2
-            [x,tau_opt] = proj_op(t,tau_opt*0.1);
-        else
-            [x,tau_opt] = proj_op(t,0);
-        end
-        
+        x = proj_op(t);
 %         toc
         deltax=x(:)-x_old(:);
         hist(ii)=norm(deltax,2);
