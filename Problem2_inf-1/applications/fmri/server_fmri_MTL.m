@@ -38,17 +38,18 @@ load('W_nr.mat')
 W0 = W_nr; %0*(rand(M,K)-0.5);
 alpha=0.02;
 max_iter=500;
-gamma= 0.005;
+gamma= 0.01;
+mem = 0.2;
 tau = compute_mixed_norm(W0,1,inf)*gamma;
 costo = @(U) costo_func(U,X,Y);
 % costo = @(U) compute_mixed_norm(U,1,inf)-tau;
 grad_op = @(U) gradient_MTL( Y,X,U );
 
 proj_op = @(U,tau0) proj_newton_pruned( U, tau, tau0);
-[W_newton, num_iter_newton,hist_newton,tiempos_newton,costo_newton,h_tau_newton] = proj_grad_desc(W0, proj_op, grad_op, 1E-3, max_iter,alpha,costo);
+[W_newton, num_iter_newton,hist_newton,tiempos_newton,costo_newton,h_tau_newton] = proj_grad_desc(W0, proj_op, grad_op, 1E-3, max_iter,alpha,costo,mem);
 
 proj_op = @(U,tau0) proj_sra( U, tau,tau0);
-[W_sra, num_iter_sra,hist_sra,tiempos_sra,costo_sra] = proj_grad_desc(W0, proj_op, grad_op, 1E-3, max_iter,alpha,costo);
+[W_sra, num_iter_sra,hist_sra,tiempos_sra,costo_sra,h_tau_sra] = proj_grad_desc(W0, proj_op, grad_op, 1E-3, max_iter,alpha,costo,mem);
 
 clear X Y U
-save(['mri_' num2str(tau) '.mat'])
+save(['mri_' num2str(tau) '_mem0.2.mat'])
