@@ -1,12 +1,10 @@
-clc;
-clear;
-close all;
-
-N = 5000;
-M = 200;
+function gen_results_todo (N,M)
+% 
+% N = 5000;
+% M = 200;
 % rng(3);
 
-shrink = @(u,ll) sign(u).*max(abs(u)-ll,0);
+
 
 num_real = 100;
 
@@ -80,3 +78,5 @@ for  gamma =[0.0001,0.0005,0.001]; %lambda =[0.05,0.1,0.2];
     pp=pp+1;
 end
 save(['results_' num2str(N) 'x' num2str(M) '_lambda' num2str(lambda) '.mat'],'resumen','err_cell','iter_cell','tiempo_cell','nz_cell')
+
+end

@@ -1,7 +1,7 @@
 function [ g ] = search_function_l1_pruned(tau,B,lambda,absB)
 %SEARCH_FUNCTION_L1 Summary of this function goes here
 %   Detailed explanation goes here
-    ind_util = logical(absB>=tau);
+    ind_util = logical(absB>tau);
     B = B(ind_util,:);
     A = loop_projL1Mich(B, tau, 20);
 %     nb = sum(abs(B),2);
