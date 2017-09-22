@@ -4,7 +4,7 @@ function [ A_prueba, tau_opt,iter] = solve_l1_search_steffenson( B,lambda, tau_0
     norm0 = @(u) sum(abs(u)>0.0001,2);
     max_iter=1000;
     tol_u = 1E-10;
-    tol = 1E-10;
+    tol = 1E-11;
     f = @(tau) search_function_l1(tau,B,lambda);
     [tau_opt,x_hist,error,iter]=steff_amat(f,tau_0,tol,max_iter,tol_u);
 

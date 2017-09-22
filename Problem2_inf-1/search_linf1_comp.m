@@ -5,13 +5,13 @@ close all;
 
 
 
-N = 50000;
-M = 1000;
+N = 5000;
+M = 200;
 % rng(3);
 
 shrink = @(u,ll) sign(u).*max(abs(u)-ll,0);
 
-num_real = 100;
+num_real = 5;
 
 errores = zeros(num_real,2);
 tiempo = zeros(num_real,2);

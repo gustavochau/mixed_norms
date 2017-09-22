@@ -7,10 +7,14 @@ for ii=1:max_iter
   
     [Fx,DFx]=feval(f,x);
     error = abs(Fx);
-    if error < tol
-        iter = ii;
-        break
+    if ii>1
+%         error = abs(x-x_hist(ii-1));
+        if error < tol
+            iter = ii;
+            break
+        end
     end
+    
     x = x-Fx/DFx;
 end
 
