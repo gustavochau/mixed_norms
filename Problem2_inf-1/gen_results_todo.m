@@ -19,7 +19,7 @@ for  gamma =[0.0001,0.0005,0.001]; %lambda =[0.05,0.1,0.2];
     for zz=1:num_real
         %     rng(5*zz)
         disp(num2str(zz))
-        
+        rng(7*zz)
         B = (rand(N,M)-0.5);
          lambda = gamma*compute_mixed_norm(B,1,inf);
 %         lambda = gamma*10;
