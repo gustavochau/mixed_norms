@@ -12,7 +12,8 @@ for ii=1:max_iter
         iter = ii;
         break
     end
-    alpha = mean(([tol_c tol_u]/(Fx*abs(Fx))));
+    alpha = mean(([tol_u/2 tol_u]/(abs(Fx))));
+%     alpha = mean(([tol_c tol_u]/(Fx*abs(Fx))));
     x2 = x + alpha*abs(Fx);
     Fy=feval(f,x2);
     delta = (Fy-Fx)/(alpha*abs(Fx));
