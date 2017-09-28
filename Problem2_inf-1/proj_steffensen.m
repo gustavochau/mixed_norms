@@ -1,4 +1,4 @@
-function [ X_newt,tau_opt,iter ] = proj_steffensen( B, lambda, tau_0 )
+function [ X_newt,tau_opt,iter,tau_1 ] = proj_steffensen( B, lambda, tau_0 )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
         if compute_mixed_norm(B,1,inf)<lambda
