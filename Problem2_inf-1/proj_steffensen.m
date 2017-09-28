@@ -10,7 +10,7 @@ function [ X_newt,tau_opt,iter ] = proj_steffensen( B, lambda, tau_0 )
         
             N = size(B,1);
             if all(abs(B(:))<lambda)
-               tau_1=0.001;
+               tau_1=0;
             else
                tau_1=0;
                for ii=1:N
