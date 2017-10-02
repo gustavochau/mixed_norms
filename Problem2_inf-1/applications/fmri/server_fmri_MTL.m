@@ -46,8 +46,12 @@ dual_norm = @(U) compute_mixed_norm(U,Inf,1);
 
 proj_op = @(U,tau0) proj_newton_pruned( U, tau, tau0);
 [W_newton, num_iter_newton,hist_newton,tiempos_newton,cambio_newton,h_bound_newton,nw_newton] = proj_grad_desc( W0, proj_op, grad_op, 1E-4, max_iter,alpha, 1, dual_norm);
+
+save(['mri_' num2str(tau) '_newton_bound.mat'])
+
+
 proj_op = @(U,tau0) proj_sra( U, tau,tau0);
 [W_sra, num_iter_sra,hist_sra,tiempos_sra,costo_sra,h_tau_sra] = proj_grad_desc( W0, proj_op, grad_op, 1E-4, max_iter,alpha, 1, dual_norm);
 
 clear X Y U
-save(['mri_' num2str(tau) '_bound.mat'])
+save(['mri_' num2str(tau) '_todo_bound.mat'])
