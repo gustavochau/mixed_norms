@@ -1,7 +1,11 @@
 function [ g ] = search_function_l1(tau,B,lambda)
 %SEARCH_FUNCTION_L1 Summary of this function goes here
 %   Detailed explanation goes here
-    [A,~,l] = loop_projL1Mich(B, tau, 20);
+%     [A,~,l] = loop_projL1Mich(B, tau, 20);
+        [A,~,l] = loop_projL1AccNewt(B, tau, 20);
+
+    
+    
 %     nb = sum(abs(B),2);
 %     s = logical(nb<tau/lambda);
 %     na = sum(abs(A),2);

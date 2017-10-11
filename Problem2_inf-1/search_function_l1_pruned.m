@@ -3,7 +3,9 @@ function [ g ] = search_function_l1_pruned(tau,B,lambda,absB)
 %   Detailed explanation goes here
     ind_util = logical(absB>tau);
     B = B(ind_util,:);
-    A = loop_projL1Mich(B, tau, 20);
+%     A = loop_projL1Mich(B, tau, 20);
+    A = loop_projL1AccNewt(B, tau, 20);
+
 %     nb = sum(abs(B),2);
 %     s = logical(nb<tau/lambda);
 %     na = sum(abs(A),2);

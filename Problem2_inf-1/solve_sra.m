@@ -13,7 +13,8 @@ function [ X, theta_opt,iter] = solve_sra(Y,gamma,tau_0)
         f = @(theta) search_function_l1(theta,Y,gamma);
         options = optimset('TolX',1E-10);
         [theta_opt,~,~,output] = fzero(f,tau_0,options);
-        X = Y - loop_projL1Mich(Y, theta_opt, 20);
+%         X = Y - loop_projL1Mich(Y, theta_opt, 20);
+        X = Y - loop_projL1AccNewt(Y, theta_opt, 20);
         iter = output.iterations;
     end
 
