@@ -38,7 +38,8 @@ load('W_nr.mat')
 W0 = W_nr; % 0*(rand(M,K)-0.5); %W_nr; 
 alpha=0.02;
 max_iter=300;
-gamma= 0.2;
+gamma= 0.01;
+
 tau = compute_mixed_norm(W0,1,inf)*gamma;
 costo = @(U) costo_func(U,X,Y);
 grad_op = @(U) gradient_MTL( Y,X,U );
@@ -66,3 +67,4 @@ rows = max(abs(W_ste),[],2);
 
 clear X Y U
 save(['mri_' num2str(tau) '_ste_bound.mat'],'rows','num_iter_ste','hist_ste','tiempos_ste','costo_ste','h_tau_ste');
+
