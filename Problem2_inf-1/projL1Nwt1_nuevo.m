@@ -1,4 +1,4 @@
-function[x, l, loops] = projL1Nwt1(b, tau, nMaxIter, myErr)
+function[x, l, loops] = projL1Nwt1_nuevo(b, tau, nMaxIter, myErr)
 loops=1;
 
 if nargin < 4
