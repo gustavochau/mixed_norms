@@ -1,4 +1,4 @@
-function [ X_newt,tau_opt,iter ] = proj_newton_pruned( B, lambda, tau0 )
+function [ X_newt,tau_opt,iter ] = proj_steffensen_pruned( B, lambda, tau_0 )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
         if compute_mixed_norm(B,1,inf)<lambda
@@ -6,11 +6,11 @@ function [ X_newt,tau_opt,iter ] = proj_newton_pruned( B, lambda, tau0 )
             return;
         end
         
-        if nargin < 3 || tau0==0
+        if nargin < 3
         
             N = size(B,1);
             if all(abs(B(:))<lambda)
-               tau_1=1E-6;
+               tau_1=0;
             else
                tau_1=0;
                for ii=1:N
@@ -24,10 +24,10 @@ function [ X_newt,tau_opt,iter ] = proj_newton_pruned( B, lambda, tau0 )
             end
 
         else
-            tau_1 = tau0;
+            tau_1 = tau_0;
         end
         
-        [ A_newt, tau_opt,iter] = solve_l1_search_newton_pruned( B,lambda, tau_1);
+        [ A_newt, tau_opt,iter] = solve_l1_search_steffenson_pruned( B,lambda, tau_1);
         X_newt = B-A_newt;
 end
 

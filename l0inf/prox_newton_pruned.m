@@ -1,8 +1,8 @@
-function [ X_newt,tau_opt,iter ] = proj_newton_pruned( B, lambda, tau0 )
+function [ A_newt,tau_opt,iter ] = prox_newton_pruned( B, lambda, tau0 )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
         if compute_mixed_norm(B,1,inf)<lambda
-            X_newt = B;
+            X_newt = 0;
             return;
         end
         
@@ -10,7 +10,7 @@ function [ X_newt,tau_opt,iter ] = proj_newton_pruned( B, lambda, tau0 )
         
             N = size(B,1);
             if all(abs(B(:))<lambda)
-               tau_1=1E-6;
+               tau_1=0.0001;
             else
                tau_1=0;
                for ii=1:N
@@ -28,6 +28,5 @@ function [ X_newt,tau_opt,iter ] = proj_newton_pruned( B, lambda, tau0 )
         end
         
         [ A_newt, tau_opt,iter] = solve_l1_search_newton_pruned( B,lambda, tau_1);
-        X_newt = B-A_newt;
 end
 
